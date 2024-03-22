@@ -1,0 +1,52 @@
+@import "nullstyle.css";
+.header,a{
+  color: #fff;
+  text-decoration: none;
+}
+
+.header{
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #716766;
+  font-family: maler;
+
+}
+
+.header__row{
+  display: flex;
+  align-items: center;
+}
+
+.headerbutton{
+  padding: 18px 33px 28px 33px;
+  font-size: 24px;
+}
+
+.headerlogo{
+  padding: 18px 33px 28px 33px;
+  font-size: 36px;
+}
+
+.headerlogin{
+  padding: 0px 14px 0px 14px;
+  font-size: 17px;
+}
+
+.headerI{
+  font-size: 40px;
+  padding: 0px 0px 9px 0px;
+}
+
+.header__item:hover{
+  background-color: #A66600;
+  border-radius: 5px;
+}
+
+.header__img{
+  padding: 0px 10px 0px 0px;
+}
+
+.search{
+  padding: 0px 30px 0px 0px;
+}
