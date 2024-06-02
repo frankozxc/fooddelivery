@@ -1,21 +1,78 @@
 <?php
-    include "vendor/components/core.php";
-    if(isset($_SESSION['user'])){
-      header('Location: index.php');
+session_start();
+include "vendor/components/core.php";
+
+function redirectTo($location, $msg = '') {
+    $_SESSION['message'] = $msg;
+    header('Location: ' . $location);
+    exit();
+}
+
+if (isset($_POST["submit"])) {
+    // Обработка регистрации пользователя
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password'];
+    $password_r = $_POST['confirmpassword'];
+    $fullname = filter_input(INPUT_POST, 'fullname', FILTER_SANITIZE_STRING);
+
+    // Проверка наличия обязательных полей
+    if (empty($email) || empty($password) || empty($fullname)) {
+        redirectTo('register.php', 'Все поля должны быть заполнены.');
     }
 
+    // Проверка совпадения паролей
+    if ($password_r !== $password) {
+        redirectTo('register.php', 'Пароли должны совпадать.');
+    }
+
+    // Хеширование пароля
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+    // Вставка данных в базу данных
+    $stmt = $link->prepare("INSERT INTO `users` (`email`, `password`, `fullname`) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $email, $passwordHash, $fullname);
+    if ($stmt->execute()) {
+        $_SESSION["userdata"] = [
+            "email" => $email,
+            "fullname" => $fullname,
+        ];
+        header("Location: index.php");
+    } else {
+        redirectTo('register.php', 'Ошибка регистрации. Этот пользователь уже существует!');
+    }
+}
+
+if (isset($_POST["submitLogin"])) {
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password'];
+
+    $stmt = $link->prepare("SELECT `id`, `password`, `fullname` FROM `users` WHERE `email` = ? LIMIT 1");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        if (password_verify($password, $user['password'])) {
+            $_SESSION["userdata"] = [
+                "userid" => $user['id'],
+                "fullname" => $user['fullname'],
+            ];
+            header("Location: index.php");
+        } else {
+            redirectTo('register.php', 'Неверный логин или пароль!');
+        }
+    } else {
+        redirectTo('register.php', 'Пользователь с таким email не найден.');
+    }
+}
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<main>
   <title>Регистрация/Авторизация</title>
-  
-  
-  
-      <link rel="stylesheet" href="css/style1.css">
-
-  
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/style1.css">
 </head>
 
 <body>
@@ -24,32 +81,34 @@
 <div class="container">
   <div class="frame">
     <div class="nav">
-      <ul class"links">
+      <ul class="links">
         <li class="signin-active"><a class="btn">Войти</a></li>
         <li class="signup-inactive"><a class="btn">Зарегистироваться </a></li>
       </ul>
     </div>
     <div ng-app ng-init="checked = false">
-				  <form class="form-signin"  method="post" name="form">
-          <label for="name">Логин</label>
-          <input class="form-styling" type="text" name="name" placeholder="" id="nameauto"/>
+				        <form class="form-signin" action="" method="post" name="form">
+          <label for="fullname">Имя пользователя</label>
+          <input class="form-styling" type="text" name="fullname" placeholder=""/>
           <label for="password">Пароль</label>
-          <input class="form-styling" type="text" name="password" placeholder="" id="passwordauto"/>
+          <input class="form-styling" type="password" name="password" placeholder=""/>
+          <input type="checkbox" id="checkbox"/>
+          <label for="checkbox" ><span class="ui"></span>Запомнить аккаунт</label>
           <div class="btn-animate">
-            <button name="autiresation" class="btn-signin" onclick="autoRez({itsReg:'false'})">Войти</button>
+            <a class="btn-signin">Войти</a>
           </div>
 				        </form>
         
-				  <form class="form-signup"  method="post" name="form">
-          <label for="name">Логин</label>
-          <input class="form-styling" type="text" name="name" placeholder="" id="name"/>
+				        <form class="form-signup" action="" method="post" name="form">
+          <label for="fullname">Полное имя</label>
+          <input class="form-styling" type="text" name="fullname" placeholder=""/>
           <label for="email">Почта</label>
-          <input class="form-styling" type="text" name="email" placeholder="" id="email"/>
+          <input class="form-styling" type="text" name="email" placeholder=""/>
           <label for="password">Пароль</label>
-          <input class="form-styling" type="text" name="password" placeholder="" id="password"/>
+          <input class="form-styling" type="password" name="password" placeholder=""/>
           <label for="confirmpassword">Повторите пароль</label>
-          <input class="form-styling" type="text" name="confirmpassword" placeholder="" id="passwordTwo"/>
-          <button name="registration" ng-click="checked = !checked" class="btn-signup" onclick="reg({itsReg:'true'})">Зарегистрироваться</button>
+          <input class="form-styling" type="password" name="confirmpassword" placeholder=""/>
+          <button name="submit" ng-click="checked = !checked" class="btn-signup">Зарегистрироваться</button>
 				        </form>
       
             <div  class="success">
@@ -57,10 +116,9 @@
        viewBox="0 0 60 60" id="check" ng-class="checked ? 'checked' : ''">
                  <path fill="#ffffff" d="M40.61,23.03L26.67,36.97L13.495,23.788c-1.146-1.147-1.359-2.936-0.504-4.314
                   c3.894-6.28,11.169-10.243,19.283-9.348c9.258,1.021,16.694,8.542,17.622,17.81c1.232,12.295-8.683,22.607-20.849,22.042
-                  c-9.9-0.46-18.128-8.344-18.972-18.218c-0.292-3.416,0.276-6.673,1.51-9.578" />
+                  c-9.9-0.46-18.128-8.344-18.972-18.218c-0.292-3.416,0.276-6.673,1.51-9.578" /></svg>
                 <div class="successtext">
-                   <p id="register"><?php if(isset($_SESSION['errors'])){ echo $_SESSION['errors'];} ?> </p>
-                   <a class="btn-goback" href="index.php"> Вернутся на главную</a>
+                   <p> Спасибо за регистрацию! Проверьте вашу электронную почту для ее подтверждения.</p>
                 </div>
              </div>
       </div>
@@ -72,8 +130,9 @@
       <div>
         <div class="cover-photo"></div>
         <div class="profile-photo"></div>
-        <h1 class="welcome"><?php if(isset($_SESSION['user']['name'])){ echo "Добро пожаловать '{$_SESSION['user']['name']}'";}else if(isset($_SESSION['errors'])){ echo $_SESSION['errors'];} ?></h1>
-        <a class="btn-goback" value="Refresh" href="index.php">На главную</a>
+        <h1 class="welcome">Добро пожаловать <?php  ?></h1>
+        <a class="btn-goback" value="Refresh" onClick="history.go()">Назад</a>
+        <a class="btn-goback" value="" onClick=" ./index.php">Перейти на сайт</a>
       </div>
   </div>
     
@@ -89,37 +148,9 @@
                 l45.369-14.738C320.371,243.946,323.965,236.895,321.832,230.327z"/>
     </svg>
   </a>
-</div>   
- <script>
-      function reg(data){
-            let formData = new FormData();
-            console.log(data)
-            formData.append("itsReg", data.itsReg)
-            formData.append("name", document.querySelector('#name').value)
-            formData.append("email", document.querySelector('#email').value)
-            formData.append("password", document.querySelector('#password').value)
-            formData.append("confirmpassword", document.querySelector('#passwordTwo').value)
-            fetch("reg.php", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json());
-      }
-      function autoRez(data2){
-            let formData2 = new FormData();
-            console.log(data2)
-            formData2.append("itsReg", data2.itsReg)
-            formData2.append("name", document.querySelector('#nameauto').value)
-            formData2.append("password", document.querySelector('#passwordauto').value)
-            fetch("reg.php", {
-                method: "POST",
-                body: formData2
-            })
-            .then(response => response.json());
-      }
-    </script>
-    <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-  <script src='http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.14/angular.min.js'></script>
+</div>
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.14/angular.min.js'></script>
 
     <script src="js/index.js"></script>
 

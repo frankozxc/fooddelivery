@@ -406,12 +406,6 @@ float: right;
   border-radius: 50px;
 }
 
-
-
-.slider>.btn {
-
-}
-
 .btn:hover {
   background-color: #7bb0ff !important;
 }
@@ -485,10 +479,7 @@ text-align: flex-end;
   background: url("../img/arrowleft.svg") 0 0/80% no-repeat;
   border: none;
 }
-.uraeda{
-  width: 500px; height: 500px;
-  padding-left: 40%;
-}
+
 .shopping-cart {
   width: 750px;
   height: 423px;
@@ -496,7 +487,6 @@ text-align: flex-end;
   background: #FFFFFF;
   box-shadow: 1px 2px 3px 0px rgba(0,0,0,0.10);
   border-radius: 6px;
- 
   display: flex;
   flex-direction: column;
 }
@@ -594,15 +584,7 @@ text-align: flex-end;
   color: #43484D;
   font-weight: 300;
 }
- 
-button[class*=btn] {
-  width: 30px;
-  height: 30px;
-  background-color: #E1E8EE;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
+
 .minus-btn img {
   margin-bottom: 3px;
 }
@@ -621,4 +603,10 @@ input:focus {
   font-size: 16px;
   color: #43484D;
   font-weight: 300;
+}
+
+  .map
+{
+  padding: 0;
+  background-position: center center;
 }

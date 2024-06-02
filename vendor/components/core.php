@@ -1,4 +1,12 @@
 <?php
-    session_start();
-    $link = new mysqli('localhost', 'root', '', 'fooddelivery');
-?>  
+    $dbHost = 'localhost';
+    $dbUser = 'root';
+    $dbPassword = '';
+    $dbName = 'fooddelivery';
+
+    $link = new mysqli($dbHost, $dbUser, $dbPassword, $dbName);
+
+    if ($link->connect_error) {
+        die("Ошибка подключения: " . $link->connect_error);
+    }
+?>

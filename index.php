@@ -1,6 +1,7 @@
 <?php
+session_start();
     include "vendor/components/core.php";
-	unset($_SESSION['errors']);
+
 
     include "vendor/components/header.php";
 
@@ -48,6 +49,7 @@
 </head>
 
 <body>
+	</div>
 	<div class="content">
 
 		<div class="container pt-5">

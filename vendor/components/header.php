@@ -1,3 +1,7 @@
+<?php
+	session_start();
+	include 'core.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -50,24 +54,21 @@
 			<a href="aboutus.php">
             <div class="header__item headerbutton">О нас </div>
 			</a>
+			<a href="index_2.php">
             <div class="header__item headerbutton">Корзина</div>
-            <div class="header__item headerbutton">Контанты</div>
-			<?php
-				if(isset($_SESSION['user'])){
-					var_dump($_SESSION['user']);
-			?>
-
-			<a href="vendor/components/outProfil.php">
-            <div class="header__item headerbutton contact">Выход</div>
 			</a>
+			<a href="contacts.php">
+            <div class="header__item headerbutton">Контанты</div></a>
 			<?php
-				}else{
-			?>
-
-			<a href="register.php">
-            <div class="header__item headerbutton contact">Вход и регистрация</div>
-			</a>
-			<?php
+			 	if (isset($_SESSION['userdata']) && !empty($_SESSION['userdata'])) 
+				{
+					$fullname = $_SESSION['userdata']['fullname'];
+					echo '<a href="../../profile.php" style="margin-right:10px; font-size:30px;">'. $fullname.'</a>';
+					echo '<a href="../../logout.php">Выйти</a>';
+				}
+				else
+				{
+					echo '<a href="register.php" style="font-size:30px"><div class="header__item headerbutton contact">Регистрация</div></a>';
 				}
 			?>
         </div>
